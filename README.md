@@ -2,6 +2,8 @@
 
 Dashboard interactivo en tiempo real para análisis de sentimientos de mensajes de WhatsApp, construido con React + Vite + shadcn/ui.
 
+🌐 **URL Producción**: [https://whatsapp-sentiment.vercel.app/](https://whatsapp-sentiment.vercel.app/)
+
 ---
 
 ## 🎯 Descripción del Proyecto
