@@ -1,6 +1,8 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
 import { useEffect, useState } from "react"
 import { useSocket } from "@/contexts/socket-context"
+import axios from 'axios'
+import apiClient from '@/lib/axios'
 
 const COLORS = {
   positivo: "#10b981",
@@ -15,15 +17,13 @@ export function SentimentChart() {
 
     // Cargar datos iniciales
   useEffect(() => {
-    const controller = new AbortController()
+    const source = axios.CancelToken.source()
 
     const fetchData = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001'
-        const response = await fetch(`${apiUrl}/api/sentimientos`, {
-          signal: controller.signal
+        const result = await apiClient.get('/api/sentimientos', {
+          cancelToken: source.token
         })
-        const result = await response.json()
 
         if (result.code === "SUCCESS" && result.data) {
           // Mapear los datos del API al formato del gráfico

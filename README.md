@@ -77,11 +77,7 @@ npm install
 Crear un archivo `.env` en la raíz del proyecto:
 
 ```env
-# URL del servidor WebSocket/Backend
-VITE_SOCKET_URL=http://localhost:3001
-
-# URL del API Backend (si es diferente)
-VITE_API_URL=http://localhost:5000
+cp .env.example .env
 ```
 
 ---
@@ -94,7 +90,7 @@ VITE_API_URL=http://localhost:5000
 npm run dev
 ```
 
-El frontend estará disponible en `http://localhost:5173` (o el puerto que Vite asigne)
+El frontend estará disponible en `http://localhost:3000` (o el puerto que Vite asigne)
 
 ### Modo de desarrollo con hot reload
 
@@ -173,91 +169,12 @@ whatsapp-sentiment-dashboard/
 
 ---
 
-## 🧩 Componentes Principales
-
-### SentimentDashboard
-
-Componente principal que orquesta todo el dashboard.
-
-**Características:**
-
-- Header con título y toggle de tema
-- Indicador de estado de conexión WebSocket
-- Grid responsive con todos los componentes
-
-### SocketContext
-
-Context Provider que maneja la conexión WebSocket.
-
-**Funcionalidades:**
-
-- Conexión automática al backend
-- Reconexión automática
-- Manejo de eventos del socket
-- Estado de conexión global
-
-### SentimentChart
-
-Gráfico de torta (pie chart) mostrando distribución de sentimientos.
-
-**Datos visualizados:**
-
-- Positivo (verde)
-- Neutral (amarillo/azul)
-- Negativo (rojo)
-
-### TopicsChart
-
-Gráfico de barras horizontales con los temas más frecuentes.
-
-**Características:**
-
-- Top 10 temas
-- Colores diferenciados
-- Tooltips interactivos
-
-### StatsCards
-
-Tarjetas de estadísticas en tiempo real.
-
-**Métricas mostradas:**
-
-- Total de mensajes analizados
-- Promedio de sentimiento
-- Mensajes del día
-- Tasa de respuesta
-
-### MessagesList
-
-Lista en tiempo real de los últimos mensajes.
-
-**Características:**
-
-- Auto-scroll a nuevos mensajes
-- Límite de 50 mensajes
-- Orden cronológico inverso
-
-### MessageCard
-
-Card individual de mensaje con toda su información.
-
-**Información mostrada:**
-
-- Remitente
-- Contenido del mensaje
-- Sentimiento (badge con color)
-- Score de sentimiento
-- Temas detectados
-- Timestamp
-
----
-
 ## 🎨 Tecnologías y Librerías
 
 ### Core
 
 - **React 18.3.1** - Biblioteca UI
-- **Vite** - Build tool y dev server
+- **Vite** - Build tool
 - **TypeScript** - Type safety
 
 ### UI/Styling
@@ -284,205 +201,6 @@ Card individual de mensaje con toda su información.
 
 ---
 
-## 📡 Eventos WebSocket
-
-### Eventos que escucha el frontend:
-
-```javascript
-// Conexión establecida
-socket.on("connect", () => {});
-
-// Nuevo mensaje analizado
-socket.on("new_message", (data) => {
-  // data.message - objeto mensaje completo
-  // data.sentiment - análisis de sentimiento
-});
-
-// Actualización de estadísticas
-socket.on("stats_update", (data) => {
-  // data.total_messages
-  // data.sentiment_distribution
-  // data.topics
-});
-
-// Dashboard data inicial
-socket.on("dashboard_data", (data) => {
-  // data.messages - lista de mensajes
-  // data.stats - estadísticas
-});
-
-// Desconexión
-socket.on("disconnect", (reason) => {});
-```
-
-### Eventos que emite el frontend:
-
-```javascript
-// Unirse al room del dashboard
-socket.emit("join_dashboard");
-
-// Solicitar data inicial
-socket.emit("get_dashboard_data");
-```
-
----
-
-## 🎨 Sistema de Temas
-
-El proyecto incluye soporte completo para tema claro y oscuro:
-
-### Características:
-
-- Toggle manual entre claro/oscuro
-- Persistencia en localStorage
-- Detección de preferencia del sistema
-- Transiciones suaves
-
-### Uso:
-
-```jsx
-import { useTheme } from "@/components/theme-provider";
-
-function Component() {
-  const { theme, setTheme } = useTheme();
-
-  return (
-    <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-      Cambiar tema
-    </button>
-  );
-}
-```
-
----
-
-## 🔧 Configuración de Tailwind
-
-El proyecto usa una configuración personalizada de Tailwind CSS:
-
-```javascript
-// tailwind.config.js
-module.exports = {
-  darkMode: ["class"],
-  content: ["./src/**/*.{js,jsx,ts,tsx}"],
-  theme: {
-    extend: {
-      colors: {
-        border: "hsl(var(--border))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        // ... más variables CSS
-      },
-    },
-  },
-};
-```
-
----
-
-## 📊 Estructura de Datos
-
-### Mensaje
-
-```typescript
-interface Message {
-  id: string;
-  sender: string;
-  content: string;
-  timestamp: string;
-  sentiment: {
-    label: "Positivo" | "Neutral" | "Negativo";
-    score: number; // -1 a 1
-    confidence: number; // 0 a 1
-  };
-  topics: string[];
-  metadata?: {
-    phone_number?: string;
-    message_type?: string;
-  };
-}
-```
-
-### Estadísticas
-
-```typescript
-interface Stats {
-  total_messages: number;
-  sentiment_distribution: {
-    positive: number;
-    neutral: number;
-    negative: number;
-  };
-  top_topics: Array<{
-    topic: string;
-    count: number;
-  }>;
-  average_sentiment: number;
-  messages_today: number;
-}
-```
-
----
-
-## 🚀 Optimizaciones
-
-### Performance
-
-- Lazy loading de componentes
-- Memoización de cálculos costosos
-- Virtual scrolling en listas grandes
-- Debounce en búsquedas/filtros
-
-### Build
-
-- Code splitting automático
-- Minificación de JS/CSS
-- Tree shaking
-- Optimización de assets
-
----
-
-## 🐛 Debugging
-
-### Logs de Socket.IO
-
-El proyecto incluye logs detallados en consola:
-
-```javascript
-✅ Socket conectado - ID: abc123
-✅ Unido al room: dashboard
-📨 Nuevo mensaje recibido: {...}
-❌ Socket desconectado - Razón: transport close
-```
-
-### React DevTools
-
-Recomendado instalar:
-
-- React Developer Tools
-- Redux DevTools (si se usa Redux)
-
----
-
-## 📝 Scripts Disponibles
-
-```bash
-# Desarrollo
-npm run dev              # Inicia dev server
-
-# Build
-npm run build            # Build para producción
-npm run preview          # Preview del build
-
-# Linting
-npm run lint             # Ejecuta ESLint
-
-# Formato
-npm run format           # Formatea código con Prettier (si está configurado)
-```
-
----
-
 ## 🔗 Integración con Backend
 
 Este frontend se conecta al backend Python/Flask del proyecto `maic`.
@@ -490,14 +208,15 @@ Este frontend se conecta al backend Python/Flask del proyecto `maic`.
 ### Endpoints esperados:
 
 ```
-WebSocket: http://localhost:3001
-API REST: http://localhost:5000
+WebSocket: http://localhost:8080
+API REST: http://localhost:8080
 ```
 
 ### Configuración del backend:
 
 Ver el README del proyecto `maic` para:
 
+- URL: https://github.com/BryanJGomez/whatsapp-sentiment-api
 - Instalación y configuración
 - Variables de entorno
 - Docker setup
@@ -522,17 +241,6 @@ lg: '1024px'
 xl: '1280px'
 2xl: '1536px'
 ```
-
----
-
-## 🔐 Seguridad
-
-### Consideraciones:
-
-- No exponer API keys en el código
-- Usar variables de entorno para configuración
-- Validar datos del socket antes de renderizar
-- Sanitizar contenido de mensajes
 
 ---
 
@@ -602,55 +310,12 @@ Para preguntas o problemas:
 
 ---
 
-## 🙏 Agradecimientos
-
-- [shadcn/ui](https://ui.shadcn.com/) por los componentes UI
-- [Radix UI](https://www.radix-ui.com/) por los primitivos accesibles
-- [Recharts](https://recharts.org/) por los gráficos
-- [Tailwind CSS](https://tailwindcss.com/) por el framework CSS
-- [Vite](https://vitejs.dev/) por el build tool
-
----
-
-**🎯 ¡Happy Coding!** 🚀
-
-│ ├── lib/ # Utilidades
-│ ├── App.jsx # Componente principal
-│ ├── main.jsx # Entry point
-│ └── index.css # Estilos globales
-├── server/
-│ └── index.js # Servidor WebSocket
-├── public/ # Archivos estáticos
-├── index.html # HTML template
-└── vite.config.js # Configuración Vite
-
-````
-
-## 🔧 Tecnologías
-
-- **React 18** - UI Library
-- **Vite** - Build tool
-- **Tailwind CSS** - Estilos
-- **Recharts** - Gráficos
-- **Socket.io** - WebSockets en tiempo real
-- **Radix UI** - Componentes UI accesibles
-- **Express** - Servidor WebSocket
-
 ## 📝 Scripts Disponibles
 
 - `npm run dev` - Inicia el servidor de desarrollo
 - `npm run build` - Construye para producción
 - `npm run preview` - Preview del build de producción
-- `npm run server` - Inicia el servidor WebSocket
 - `npm run lint` - Ejecuta el linter
-
-## 🌐 Variables de Entorno
-
-Crea un archivo `.env` en la raíz del proyecto:
-
-```env
-VITE_SOCKET_URL=http://localhost:3001
-````
 
 ## 📄 Licencia
 

@@ -1,6 +1,8 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { useEffect, useState } from "react"
 import { useSocket } from "@/contexts/socket-context"
+import axios from 'axios'
+import apiClient from '@/lib/axios'
 
 export function TopicsChart() {
   const [data, setData] = useState([])

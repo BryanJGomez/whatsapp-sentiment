@@ -1,6 +1,8 @@
 import { MessageCard } from "./message-card"
 import { useEffect, useState } from "react"
 import { useSocket } from "@/contexts/socket-context"
+import axios from 'axios'
+import apiClient from '@/lib/axios'
 
 // Función para mapear los datos del API al formato del componente
 const mapApiMessageToComponent = (apiMessage) => {
@@ -21,21 +23,14 @@ export function MessagesList() {
 
   // Cargar mensajes iniciales desde el API
   useEffect(() => {
-    const controller = new AbortController()
+    const source = axios.CancelToken.source()
 
     const fetchMessages = async () => {
       try {
         setIsLoading(true)
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001'
-        const response = await fetch(`${apiUrl}/api/mensajes-recientes`, {
-          signal: controller.signal
+        const data = await apiClient.get('/api/mensajes-recientes', {
+          cancelToken: source.token
         })
-
-        if (!response.ok) {
-          throw new Error('Error al cargar mensajes')
-        }
-
-        const data = await response.json()
 
         // Verificar si la data es un array o viene en una propiedad
         let messagesArray = []

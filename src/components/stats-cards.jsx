@@ -1,6 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { useEffect, useState } from "react"
 import { useSocket } from "@/contexts/socket-context"
+import axios from 'axios'
+import apiClient from '@/lib/axios'
 
 export function StatsCards() {
   const [stats, setStats] = useState({
@@ -12,27 +14,24 @@ export function StatsCards() {
   const [isLoading, setIsLoading] = useState(true)
   const { socket, isConnected } = useSocket()
 
-  // Cargar estadísticas iniciales
+    // Cargar estadísticas iniciales
   useEffect(() => {
-    const controller = new AbortController()
+    const source = axios.CancelToken.source()
 
     const fetchStats = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001'
-        const response = await fetch(`${apiUrl}/api/estadisticas`, {
-          signal: controller.signal
+        const result = await apiClient.get('/api/estadisticas', {
+          cancelToken: source.token
         })
-        const result = await response.json()
 
         if (result.code === "SUCCESS" && result.data) {
           setStats(result.data)
         }
       } catch (error) {
-        if (error.name === 'AbortError') {
-          console.log('Fetch stats cancelado (StrictMode cleanup)')
+        if (error.cancelled || axios.isCancel(error)) {
           return
         }
-        // Error fetching stats
+        console.error('Error cargando estadísticas:', error)
       } finally {
         setIsLoading(false)
       }
@@ -41,7 +40,7 @@ export function StatsCards() {
     fetchStats()
 
     return () => {
-      controller.abort()
+      source.cancel('Componente desmontado')
     }
   }, [])
 
