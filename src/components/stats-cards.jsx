@@ -14,16 +14,24 @@ export function StatsCards() {
 
   // Cargar estadísticas iniciales
   useEffect(() => {
+    const controller = new AbortController()
+
     const fetchStats = async () => {
       try {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001'
-        const response = await fetch(`${apiUrl}/api/estadisticas`)
+        const response = await fetch(`${apiUrl}/api/estadisticas`, {
+          signal: controller.signal
+        })
         const result = await response.json()
 
         if (result.code === "SUCCESS" && result.data) {
           setStats(result.data)
         }
       } catch (error) {
+        if (error.name === 'AbortError') {
+          console.log('Fetch stats cancelado (StrictMode cleanup)')
+          return
+        }
         // Error fetching stats
       } finally {
         setIsLoading(false)
@@ -31,6 +39,10 @@ export function StatsCards() {
     }
 
     fetchStats()
+
+    return () => {
+      controller.abort()
+    }
   }, [])
 
   // Escuchar actualizaciones por socket

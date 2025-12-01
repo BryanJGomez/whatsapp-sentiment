@@ -15,10 +15,14 @@ export function SentimentChart() {
 
     // Cargar datos iniciales
   useEffect(() => {
+    const controller = new AbortController()
+
     const fetchData = async () => {
       try {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001'
-        const response = await fetch(`${apiUrl}/api/sentimientos`)
+        const response = await fetch(`${apiUrl}/api/sentimientos`, {
+          signal: controller.signal
+        })
         const result = await response.json()
 
         if (result.code === "SUCCESS" && result.data) {

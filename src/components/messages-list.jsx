@@ -21,11 +21,15 @@ export function MessagesList() {
 
   // Cargar mensajes iniciales desde el API
   useEffect(() => {
+    const controller = new AbortController()
+
     const fetchMessages = async () => {
       try {
         setIsLoading(true)
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001'
-        const response = await fetch(`${apiUrl}/api/mensajes-recientes`)
+        const response = await fetch(`${apiUrl}/api/mensajes-recientes`, {
+          signal: controller.signal
+        })
 
         if (!response.ok) {
           throw new Error('Error al cargar mensajes')

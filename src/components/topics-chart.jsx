@@ -9,10 +9,14 @@ export function TopicsChart() {
 
   // Cargar datos iniciales
   useEffect(() => {
+    const controller = new AbortController()
+
     const fetchData = async () => {
       try {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001'
-        const response = await fetch(`${apiUrl}/api/temas`)
+        const response = await fetch(`${apiUrl}/api/temas`, {
+          signal: controller.signal
+        })
         const result = await response.json()
 
         if (result.code === "SUCCESS" && result.data) {
@@ -21,9 +25,13 @@ export function TopicsChart() {
             name: item.tema || item.name,
             value: item.cantidad || item.count || item.value,
           }))
-          setData(chartData)
-        }
+        setData(chartData)
+      }
       } catch (error) {
+        if (error.name === 'AbortError') {
+          console.log('Fetch temas cancelado (StrictMode cleanup)')
+          return
+        }
         // Error fetching topics
       } finally {
         setIsLoading(false)
@@ -31,9 +39,11 @@ export function TopicsChart() {
     }
 
     fetchData()
-  }, [])
 
-    // Escuchar actualizaciones por socket
+    return () => {
+      controller.abort()
+    }
+  }, [])    // Escuchar actualizaciones por socket
   useEffect(() => {
     if (!socket || !isConnected) return
 
